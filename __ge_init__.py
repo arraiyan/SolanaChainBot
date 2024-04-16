@@ -3,11 +3,14 @@ import sqlite3
 def create_db():
     conn = sqlite3.connect('db.sqlite3')
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS your_table_name (
+    cursor.execute('''CREATE TABLE IF NOT EXISTS contract_data (
                         id INTEGER PRIMARY KEY,
-                        date_joined DATE,
-                        latest_block_number INTEGER,
-                        delay INTEGER
+                        contract TEXT,
+                        date_created DATETIME,
+                        pings INTEGER,
+                        latest_block INTEGER,
+                        total_calls INTEGER,
+                        total_buy INTEGER
                     )''')
     conn.commit()
     conn.close()

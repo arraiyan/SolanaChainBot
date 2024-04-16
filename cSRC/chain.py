@@ -1,9 +1,9 @@
-from dexteritysdk.dex.sdk_context import SDKContext, SDKTrader
 from solana.rpc.async_api import AsyncClient 
 from solana.rpc.api import Client
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 import requests
+
 
 
 solana_client = Client('https://solana-mainnet.g.alchemy.com/v2/uhJMLwtnUi_yGWgsvX5GNqSJk2-fh9WW')
@@ -22,12 +22,14 @@ def market_data(token_address):
         if "market_data" in data and "current_price" in data["market_data"] and "usd" in data["market_data"]["current_price"]:
             exchange_rate = float(data["market_data"]["current_price"]["usd"]) 
 
-        name = data['name']
-        liquidity = data.get("liquidity",None)
-        print(data)
-        return market_cap , market_rank , exchange_rate , name 
 
 
+        return market_cap , market_rank , exchange_rate 
+
+def terminal_get_token(address:str):
+    rpc_url = f'https://api.geckoterminal.com/api/v2/networks/solana/tokens/{address}?include=top_pools'
+    response = requests.get(rpc_url)
+    return response.json()
 
 def get_liqui(token_address):
     market_address = ''
