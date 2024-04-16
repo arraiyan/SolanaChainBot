@@ -1,3 +1,4 @@
 ./env
 ./cSRC/__pycache__/
 **.pyc
+usernames.json
