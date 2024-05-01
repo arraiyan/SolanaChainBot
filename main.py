@@ -131,7 +131,7 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
             pool_id = token_info['included'][0]['attributes']['address']
             print('pool_id ',pool_id)
             get_dex = requests.get(f'https://api.dexscreener.com/latest/dex/pairs/solana/{pool_id},').json()
-            mc = get_dex['pairs'][0]['volume']['h24']
+            mc = get_dex['pairs'][0]['fdv']
             liqui = get_dex['pairs'][0]['liquidity']['usd']
 
             # try:
@@ -175,7 +175,7 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
 📌 Coin Name ({symbol})
 
 💲  Exchange Rate USDC: $ {exchange_rate}
-💎 Market Cap : $ {round(float(diluted_volume),2) if diluted_volume else 0.0}
+💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
 ⏳ Pings :       {c_data.total_calls}
 📊 Buys in last 24 hours:     {buys_ing_24h}
 🔸 Chain: SOL | ⚖️ Age: null
