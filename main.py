@@ -65,6 +65,16 @@ async def add_new_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             await update.message.reply_text("Please login first useing /login password")
     pass
 
+async def add_channel1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    if not update.message.chat.type == 'private':
+        if update.message.from_user.id in ENV.ADMINS:
+            chat_id = update.message.chat_id
+            ENV.CHANNEL_ONE.append(chat_id)
+            await update.message.reply_text("Your group have been added")
+        else :
+            await update.message.reply_text("Please login first useing /login password")
+    pass
 
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     usernames['usernames'].append(update.message.from_user.username)
@@ -96,13 +106,15 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
     analyze = analyze_tx(tx)
     for token in analyze:
         try:
-            
+            first_ping = False
             c_data = cdb.query_database('contract',token)
             if len(c_data)>=1:
                 c_data = c_data[0]
             else:
                 c_data = cdb(len(cdb.get_all_users()),contract=token,date_created=datetime.now())
                 c_data.create()
+                c_data.save()
+                first_ping = True
 
             c_data.total_calls+=1
             c_data.latest_block = int(tx['result']['slot'])
@@ -111,11 +123,17 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
             save_json(token_info,'token_info.json')
             get_sol_usd = terminal_get_token("So11111111111111111111111111111111111111112")['data']['attributes']['price_usd']
             symbol = token_info['data']['attributes']['symbol']
-            liquidity = token_info['data']['attributes']['total_reserve_in_usd']
-            market_cap = token_info['data']['attributes']['market_cap_usd']
+
             diluted_volume = token_info['data']['attributes']['fdv_usd']
             buys_ing_24h = token_info['included'][0]['attributes']['transactions']['h24']['buys']
             exchange_rate = token_info['data']['attributes']['price_usd']
+
+            pool_id = token_info['included'][0]['attributes']['address']
+            print('pool_id ',pool_id)
+            get_dex = requests.get(f'https://api.dexscreener.com/latest/dex/pairs/solana/{pool_id},').json()
+            mc = get_dex['pairs'][0]['volume']['h24']
+            liqui = get_dex['pairs'][0]['liquidity']['usd']
+
             # try:
             #     market_cap , market_rank , exchange_rate = market_data(token)
             # except:
@@ -123,7 +141,31 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
             # print(symbol , liquidity , diluted_volume)
             # save_json( market_data('E775oRnkLxStuPHeDca9rxNUaByJtwareyg9DvX6P4GU'),'data_json.json')
 
-            
+            if first_ping:
+                for i in ENV.CHANNEL_ONE:
+
+                    
+                    if not symbol == 'USDC' and not symbol=="USDT":
+                        await context.bot.send_message(chat_id=i,text=f"""
+
+    📌 Coin Name ({symbol})
+
+    💲  Exchange Rate USDC: $ {exchange_rate}
+    💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
+    ⏳ Pings :       {c_data.total_calls}
+    📊 Buys in last 24 hours:     {buys_ing_24h}
+    🔸 Chain: SOL | ⚖️ Age: null
+    🌿 Mint: No ✅ 
+    💎 Liquidity: 🔥 ${liqui:00.2f}
+    🔸 FDV ${diluted_volume}
+    Exchange Rate SOL / {symbol}  {float(float(exchange_rate)/float(get_sol_usd)) if exchange_rate and get_sol_usd else 'null'} Sol
+    Contract Address <b>{token}</b>
+    <a href='https://dexscreener.com/solana/{token}'>Dexscreener</a> | <a href='https://birdeye.so/token/{token}?chain=solana'>Birdeye</a>
+    <a href='https://photon-sol.tinyastro.io'>Photon</a> | <a href='https://t.me/bonkbot_bot/?start={token}'>Bonkbot</a>
+    <a href='https://t.me/BananaGunSolana_bot?start={token}'>BananaGunBot</a> 
+    <a href='https://www.dextools.io/app/en/solana/pair-explorer/{token}'>Dextools</a> 
+    """,parse_mode='HTML')
+        
             for i in ENV.GROUPS:
 
                 
@@ -132,18 +174,23 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 📌 Coin Name ({symbol})
 
-💲  Echange Rate USDC: $ {exchange_rate}
-💎 Market Cap : $ {market_cap if market_cap else 0.0}
+💲  Exchange Rate USDC: $ {exchange_rate}
+💎 Market Cap : $ {round(float(diluted_volume),2) if diluted_volume else 0.0}
 ⏳ Pings :       {c_data.total_calls}
 📊 Buys in last 24 hours:     {buys_ing_24h}
 🔸 Chain: SOL | ⚖️ Age: null
-🌿 Mint: No ✅ | Liq: 🔥 ${liquidity}
-🔸 FDV ${diluted_volume}
+🌿 Mint: No ✅ 
+💎 Liquidity: 🔥 ${liqui:00.2f}
+
 Exchange Rate SOL / {symbol}  {float(float(exchange_rate)/float(get_sol_usd)) if exchange_rate and get_sol_usd else 'null'} Sol
 Contract Address <b>{token}</b>
-<a href='https://dexscreener.com/solana/{token}'>Dexscreene</a> | <a href='https://birdeye.so/token/{token}?chain=solana'>Birdeye</a>
-<a href='https://photon-sol.tinyastro.io'>Photon</a> | <a href='https://t.me/bonkbot_bot'>Bonkbot</a>
-Banana : @BananaGunSolana_bot""",parse_mode='HTML')
+<a href='https://dexscreener.com/solana/{token}'>Dexscreener</a> | <a href='https://birdeye.so/token/{token}?chain=solana'>Birdeye</a>
+<a href='https://photon-sol.tinyastro.io'>Photon</a> | <a href='https://t.me/bonkbot_bot/?start={token}'>Bonkbot</a>
+<a href='https://t.me/BananaGunSolana_bot?start={token}'>BananaGunBot</a> 
+<a href='https://www.dextools.io/app/en/solana/pair-explorer/{token}'>Dextools</a> 
+""",parse_mode='HTML')
+        
+        
         except Exception as e:
             print(e)
             pass
@@ -180,6 +227,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("login", login))
     application.add_handler(CommandHandler("add_group", add_new_group))
+    application.add_handler(CommandHandler("add_channel1", add_channel1))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 

@@ -2,3 +2,7 @@
 ./cSRC/__pycache__/
 **.pyc
 usernames.json
+env/
+./env
+.env
+env
