@@ -153,7 +153,7 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 💲  Exchange Rate USDC: $ {exchange_rate}
 💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
-⏳ Pings :       {c_data.total_calls}
+⏳ First Ping :       {c_data.total_calls}
 📊 Buys in last 24 Hours:     {buys_ing_24h}
 🔸 Chain: SOL | ⚖️ Age: null
 🌿 Mint: No ✅ 
@@ -177,7 +177,7 @@ Contract Address <b>{token}</b>
 
 💲  Exchange Rate USDC: $ {exchange_rate}
 💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
-⏳ Pings :       {c_data.total_calls}
+⏳ Total all pings :       {c_data.total_calls}
 📊 Buys in last 5 Minutes:     {buys_ing_5m}
 🔸 Chain: SOL | ⚖️ Age: null
 🌿 Mint: No ✅ 
