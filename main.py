@@ -126,6 +126,7 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
 
             diluted_volume = token_info['data']['attributes']['fdv_usd']
             buys_ing_24h = token_info['included'][0]['attributes']['transactions']['h24']['buys']
+            buys_ing_5m = token_info['included'][0]['attributes']['transactions']['m5']['buys']
             exchange_rate = token_info['data']['attributes']['price_usd']
 
             pool_id = token_info['included'][0]['attributes']['address']
@@ -145,25 +146,25 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
                 for i in ENV.CHANNEL_ONE:
 
                     
-                    if not symbol == 'USDC' and not symbol=="USDT":
+                    if not symbol == 'USDC' and not symbol=="USDT" and int(buys_ing_24h)<150:
                         await context.bot.send_message(chat_id=i,text=f"""
 
-    📌 Coin Name ({symbol})
+📌 Coin Name ({symbol})
 
-    💲  Exchange Rate USDC: $ {exchange_rate}
-    💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
-    ⏳ Pings :       {c_data.total_calls}
-    📊 Buys in last 24 hours:     {buys_ing_24h}
-    🔸 Chain: SOL | ⚖️ Age: null
-    🌿 Mint: No ✅ 
-    💎 Liquidity: 🔥 ${liqui:00.2f}
-    🔸 FDV ${diluted_volume}
-    Exchange Rate SOL / {symbol}  {float(float(exchange_rate)/float(get_sol_usd)) if exchange_rate and get_sol_usd else 'null'} Sol
-    Contract Address <b>{token}</b>
-    <a href='https://dexscreener.com/solana/{token}'>Dexscreener</a> | <a href='https://birdeye.so/token/{token}?chain=solana'>Birdeye</a>
-    <a href='https://photon-sol.tinyastro.io'>Photon</a> | <a href='https://t.me/bonkbot_bot/?start={token}'>Bonkbot</a>
-    <a href='https://t.me/BananaGunSolana_bot?start={token}'>BananaGunBot</a> 
-    <a href='https://www.dextools.io/app/en/solana/pair-explorer/{token}'>Dextools</a> 
+💲  Exchange Rate USDC: $ {exchange_rate}
+💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
+⏳ Pings :       {c_data.total_calls}
+📊 Buys in last 24 Hours:     {buys_ing_24h}
+🔸 Chain: SOL | ⚖️ Age: null
+🌿 Mint: No ✅ 
+💎 Liquidity: 🔥 ${liqui:00.2f}
+🔸 FDV ${diluted_volume}
+Exchange Rate SOL / {symbol}  {float(float(exchange_rate)/float(get_sol_usd)) if exchange_rate and get_sol_usd else 'null'} Sol
+Contract Address <b>{token}</b>
+<a href='https://dexscreener.com/solana/{token}'>Dexscreener</a> | <a href='https://birdeye.so/token/{token}?chain=solana'>Birdeye</a>
+<a href='https://photon-sol.tinyastro.io'>Photon</a> | <a href='https://t.me/bonkbot_bot/?start={token}'>Bonkbot</a>
+<a href='https://t.me/BananaGunSolana_bot?start={token}'>BananaGunBot</a> 
+<a href='https://www.dextools.io/app/en/solana/pair-explorer/{token}'>Dextools</a> 
     """,parse_mode='HTML')
         
             for i in ENV.GROUPS:
@@ -177,7 +178,7 @@ async def updater_via_time(context: ContextTypes.DEFAULT_TYPE) -> None:
 💲  Exchange Rate USDC: $ {exchange_rate}
 💎 Market Cap : $ {round(float(mc),2) if mc else 0.0}
 ⏳ Pings :       {c_data.total_calls}
-📊 Buys in last 24 hours:     {buys_ing_24h}
+📊 Buys in last 5 Minutes:     {buys_ing_5m}
 🔸 Chain: SOL | ⚖️ Age: null
 🌿 Mint: No ✅ 
 💎 Liquidity: 🔥 ${liqui:00.2f}
@@ -221,7 +222,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def main() -> None:
     application = Application.builder().token(ENV.API_KEY).build()
     try:
-        application.job_queue.run_repeating(updater_via_time,timedelta(seconds=10))
+        application.job_queue.run_repeating(updater_via_time,timedelta(seconds=1))
     except:
         pass    
     application.add_handler(CommandHandler("start", start))
