@@ -222,7 +222,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def main() -> None:
     application = Application.builder().token(ENV.API_KEY).build()
     try:
-        application.job_queue.run_repeating(updater_via_time,timedelta(seconds=3))
+        application.job_queue.run_repeating(updater_via_time,timedelta(seconds=5))
     except:
         pass    
     application.add_handler(CommandHandler("start", start))
